@@ -18,18 +18,19 @@ função `main`, implicitamente criada pelo compilador.
 
 Instruções
 ----------
-Instrução    | Pilha anterior | Pilha atual
------------- | -------------- | -----------
-dup          | [..., x]       | [..., x, x]
-rot          | [..., x, y]    | [..., y, x]
-add          | [..., x, y]    | [..., (x + y)]
-sub          | [..., x, y]    | [..., (x - y)]
-mul          | [..., x, y]    | [..., (x * y)]
-div          | [..., x, y]    | [..., (x / y)]
-mod          | [..., x, y]    | [..., (x % y)]
-push *CONST* | [...]          | [..., *CONST*]
-call *FUNC*  | [...]          | Depende da função
-print        | [..., x]       | [...] (e printa o valor de `x`)
+Instrução      | Pilha anterior | Pilha atual
+-------------- | -------------- | -----------
+dup            | [..., x]       | [..., x, x]
+rot            | [..., x, y]    | [..., y, x]
+add            | [..., x, y]    | [..., (x + y)]
+sub            | [..., x, y]    | [..., (x - y)]
+mul            | [..., x, y]    | [..., (x * y)]
+div            | [..., x, y]    | [..., (x / y)]
+mod            | [..., x, y]    | [..., (x % y)]
+push *CONST*   | [...]          | [..., *CONST*]
+call *FUNC*    | [...]          | Depende da função
+print          | [..., x]       | [...] (e printa o valor de `x`)
+print *STRING* | [...]          | [...] (e printa o valor de *STRING*)
 
 
 Gramática
@@ -48,7 +49,7 @@ Instrução <- ("dup"
             / "mod"
             / "push" EspaçoArg Constante
             / "call" EspaçoArg NomeFunção
-            / "print"
+            / "print" (EspaçoArg String)?
             )
             EOI
 
@@ -56,6 +57,9 @@ DefFunção <- "function" EspaçoArg NomeFunção EOI (Instrução S)* "end"
 NomeFunção <- [_\w] [_\w\d]*
 
 Constante <- \d+  # por enquanto
+String <- "\"" (!"\"" Char)* "\""
+Char <- "\\" [abfnrtv\'\"\\]
+      / .
 
 EspaçoArg <- (" " / "\t")*
 EOI <- (" " / "\t" / Comentário)* (";" / EOL / !.)

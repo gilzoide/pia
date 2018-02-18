@@ -4,13 +4,41 @@
 #include <ctype.h>
 
 static pt_data todouble(const char *str, size_t begin, size_t end, int argc, pt_data *argv, void *data) {
-	return (pt_data){ .d = atof(str + begin) };
+    return (pt_data){ .d = atof(str + begin) };
+}
+static pt_data tostring(const char *str, size_t begin, size_t end, int argc, pt_data *argv, void *data) {
+    char *new_str;
+    if(new_str = malloc((argc + 1) * sizeof(char))) {
+        int i;
+        for(i = 0; i < argc; i++) {
+            new_str[i] = argv[i].c;
+        }
+        new_str[i] = '\0';
+    }
+    return (pt_data){ .p = new_str };
+}
+static pt_data tochar(const char *str, size_t begin, size_t end, int argc, pt_data *argv, void *data) {
+    char c = str[begin];
+    if(c == '\\') {
+        c = str[begin + 1];
+        switch(c) {
+            case 'a': c = '\a'; break;
+            case 'b': c = '\b'; break;
+            case 'f': c = '\f'; break;
+            case 'n': c = '\n'; break;
+            case 'r': c = '\r'; break;
+            case 't': c = '\t'; break;
+            case 'v': c = '\v'; break;
+            default: break;
+        }
+    }
+    return (pt_data){ .c = c };
 }
 static pt_data conta_eol(const char *str, size_t begin, size_t end, int argc, pt_data *argv, void *data) {
-	pia_jit *jit = data;
-	jit->line_count++;
-	jit->last_eol_pos = begin;
-	return PT_NULL_DATA;
+    pia_jit *jit = data;
+    jit->line_count++;
+    jit->last_eol_pos = begin;
+    return PT_NULL_DATA;
 }
 
 #include <pega-texto/macro-on.h>
@@ -27,13 +55,19 @@ pt_grammar *pia_create_parser() {
                               L("mod"),
                               SEQ(L("push"), V("EspacoArg"), V("Constante")),
                               SEQ(L("call"), V("EspacoArg"), V("NomeFuncao")),
-                              L("print")),
+                              SEQ(L("print"), Q(SEQ(V("EspacoArg"), V("String")), -1))),
                            V("EOI")) },
         { "DefFuncao", SEQ(L("function"), V("EspacoArg"), V("NomeFuncao"), V("EOI"),
                                           Q(SEQ(V("Instrucao"), V("S")), 0),
                            L("end")) },
         { "NomeFuncao", SEQ(OR(L("_"), F(isalpha)), Q(OR(L("_"), F(isalnum)), 0)) },
+
         { "Constante", Q_(todouble, F(isdigit), 1) },  // TODO: float
+        { "String", SEQ_(tostring, L("\""), Q(SEQ(NOT(L("\"")), V("Char")), 0), L("\"")) },
+        { "Char", OR_(tochar,
+                      SEQ(L("\\"), S("abfnrtv\'\"\\")),
+                      ANY) },
+
         { "EspacoArg", Q(S(" \t"), 0) },
         { "EOI", SEQ(Q(OR(S(" \t"), V("Comentario")), 0), OR(L(";"), V("EOL"), V("EOF"))) },
         { "EOL", L("\n") },

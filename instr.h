@@ -20,7 +20,7 @@ typedef struct {
 	int opcode;
 	union {
 		double d; // Argument for PUSH instruction
-		char *s;  // Argument for CALL instruction
+		char *s;  // Argument for CALL or PRINT instructions
 	} r1;
 } instr;
 

@@ -7,7 +7,7 @@ Dependências
 ------------
 + [libgccjit](https://gcc.gnu.org/wiki/JIT)
 + [pega-texto](https://github.com/gilzoide/pega-texto)
-+ [judy](http://judy.sourceforge.net/)
++ [Judy](http://judy.sourceforge.net/)
 
 
 Linguagem
