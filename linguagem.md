@@ -4,15 +4,22 @@ Linguagem
 Todas as operações funcionam nessa pilha, que possui um tamanho máximo definido
 em tempo de compilação.
 
-Funções podem receber quantos argumentos quiser e empilhar quantos argumentos
-quiser.
+Funções
+-------
+Funções são do tipo `void (pilha *)`, sendo a pilha dinâmica e sequencial: uma
+`struct { double *v; int s; }` contendo um vetor de números e seu tamanho.
+
+Funções podem receber quantos argumentos quiser pela pilha e empilhar quantos
+retornos quiser. Cuidado com *overflow* e *underflow*!
+
+Instruções que estiverem fora de definições de funções serão adicionadas à
+função `main`, implicitamente criada pelo compilador.
 
 
 Instruções
 ----------
-
 Instrução    | Pilha anterior | Pilha atual
--------------|-----------------------------
+------------ | -------------- | -----------
 dup          | [..., x]       | [..., x, x]
 rot          | [..., x, y]    | [..., y, x]
 add          | [..., x, y]    | [..., (x + y)]
@@ -28,7 +35,7 @@ print        | [..., x]       | [...] (e printa o valor de `x`)
 Gramática
 ---------
 ```
-Programa <- HashBang S ((Instrução / DefFunção) S)* !.
+Programa <- HashBang S ((DefFunção / Instrução) S)* !.
 
 HashBang <- "#!" [^\n]*
 

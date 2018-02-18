@@ -3,7 +3,9 @@
 
 #include <pega-texto.h>
 
-pt_grammar *cria_parser();
+#include "instr.h"
+
+pt_grammar *pia_create_parser();
 
 #endif
 

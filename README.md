@@ -1,8 +1,13 @@
 pia
 ===
-Compilador JIT para uma linguagem simples baseada em pilha, usando
-[pega-texto](https://github.com/gilzoide/pega-texto) e
-[libgccjit](https://gcc.gnu.org/wiki/JIT).
+Compilador JIT para uma linguagem simples baseada em pilha.
+
+
+Dependências
+------------
++ [libgccjit](https://gcc.gnu.org/wiki/JIT)
++ [pega-texto](https://github.com/gilzoide/pega-texto)
++ [judy](http://judy.sourceforge.net/)
 
 
 Linguagem

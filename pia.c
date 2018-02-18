@@ -1,9 +1,9 @@
-#include <libgccjit.h>
-#include "parser.h"
+#include "jit.h"
 
 int main(int argc, char **argv) {
-	pt_grammar *g = cria_parser();
+	pia_jit jit;
+	if(!pia_initialize_jit(&jit)) return -1;
 
-	pt_destroy_grammar(g);
+	pia_destroy_jit(&jit);
 	return 0;
 }
