@@ -1,7 +1,7 @@
 #ifndef __PIA_INSTR_H__
 #define __PIA_INSTR_H__
 
-typedef enum {
+enum {
 	DUP = 0,
 	ROT,
 	ADD,
@@ -14,15 +14,29 @@ typedef enum {
 	PRINT,
 
 	INSTRUCOES_END,
-} instruction_opcode;
+};
+
+static const char * const pia_instruction_names[] = {
+	"DUP",
+	"ROT",
+	"ADD",
+	"SUB",
+	"MUL",
+	"DIV",
+	"MOD",
+	"PUSH",
+	"CALL",
+	"PRINT",
+};
 
 typedef struct {
-	int opcode;
 	union {
 		double d; // Argument for PUSH instruction
 		char *s;  // Argument for CALL or PRINT instructions
 	} r1;
-} instr;
+	int opcode;
+	int line_on_file;
+} pia_instr;
 
 #endif
 

@@ -7,15 +7,18 @@
 #include "parser.h"
 
 typedef struct {
-	pt_grammar *grammar;  // Grammar, for parsing source code
-	int line_count;       // Line count, for location
-	int last_eol_pos;     // Position of last "\n", for location
-	gcc_jit_context *ctx; // JIT context
-	Pvoid_t func_map;     // 'Name -> Function' map
+	pia_parser *parser;           // The parser
+	gcc_jit_context *ctx;         // JIT context
+	gcc_jit_struct *pilha_struct; // The stack struct
+	gcc_jit_type *pilha_type;     // The stack struct type
+	gcc_jit_type *void_type;      // The void type, for returns
+	gcc_jit_param *pilha_param;   // The stack parameter
+	Pvoid_t func_map;             // 'Name -> Function' map
 } pia_jit;
 
 int pia_initialize_jit(pia_jit *jit);
 void pia_destroy_jit(pia_jit *jit);
+int pia_run_file(pia_jit *jit, const char *filename);
 
 #endif
 

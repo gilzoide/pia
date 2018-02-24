@@ -4,4 +4,5 @@ project(pia)
 
 file(GLOB src "*.c")
 add_executable(pia ${src})
-target_link_libraries(pia pega-texto gccjit Judy)
+target_link_libraries(pia pega-texto2 gccjit Judy)
+
