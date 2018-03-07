@@ -6,21 +6,28 @@
 #include "instr.h"
 
 typedef struct {
+	pia_instr **instructions;
+	char *name;
+	int instr_count;
+	int line_on_file;
+} pia_parsed_function;
+
+typedef struct {
 	const char *filename;
 	const char *input;
-	char *current_function_name;
+	pia_parsed_function main;
+	int func_count;
 	int line_count;
 	int last_eol_pos;
 } pia_parser_state;
 
-typedef struct {
-	pia_instr **instructions;
-	char *name;
-	int instr_count;
-} pia_parsed_function;
-
 enum {
 	ERR_UNEXPECTED_TOKEN,
+	ERR_END_EXPECTED,
+};
+static const char * const pia_error_messages[] = {
+	[ERR_UNEXPECTED_TOKEN] = "token inesperado",
+	[ERR_END_EXPECTED] = "'END' esperado fechando função",
 };
 
 typedef pt_grammar pia_parser;

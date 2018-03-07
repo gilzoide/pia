@@ -1,0 +1,11 @@
+
+function coler
+	push 5
+	dup
+	mul
+end
+
+PRINT "olar: "
+call coler
+print
+print "\n"
