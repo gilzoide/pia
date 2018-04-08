@@ -59,6 +59,11 @@ static pia_instr *new_instruction(int opcode, int line) {
 	}
 	return new_instr;
 }
+static pt_data instr_NOP(const char *str, size_t begin, size_t end, int argc, pt_data *argv, void *data) {
+	pia_parser_state *state = data;
+	find_current_line(state, begin);
+	return (pt_data){ .p = new_instruction(NOP, state->line_count) };
+}
 static pt_data instr_DUP(const char *str, size_t begin, size_t end, int argc, pt_data *argv, void *data) {
 	pia_parser_state *state = data;
 	find_current_line(state, begin);
@@ -103,6 +108,11 @@ static pt_data instr_PUSH(const char *str, size_t begin, size_t end, int argc, p
 	}
 	return (pt_data){ .p = new_instr };
 }
+static pt_data instr_POP(const char *str, size_t begin, size_t end, int argc, pt_data *argv, void *data) {
+	pia_parser_state *state = data;
+	find_current_line(state, begin);
+	return (pt_data){ .p = new_instruction(POP, state->line_count) };
+}
 static pt_data instr_CALL(const char *str, size_t begin, size_t end, int argc, pt_data *argv, void *data) {
 	pia_parser_state *state = data;
 	find_current_line(state, begin);
@@ -117,7 +127,7 @@ static pt_data instr_PRINT(const char *str, size_t begin, size_t end, int argc, 
 	find_current_line(state, begin);
 	pia_instr *new_instr = new_instruction(PRINT, state->line_count);
 	if(new_instr) {
-		new_instr->r1.s = argc > 0 ? strdup(argv[0].p) : NULL;
+		new_instr->r1.s = argc > 0 ? argv[0].p : NULL;
 	}
 	return (pt_data){ .p = new_instr };
 }
@@ -190,7 +200,8 @@ pt_grammar *pia_create_parser() {
                           Q_(all_funcs, SEQ(OR(V_(defun, "DefFuncao"), V_(add_to_main, "Instrucao")), V("S")), 0),
                           V("EOF")) },
         { "HashBang", SEQ(L("#!"), Q(BUT(L("\n")), 0)) },
-        { "Instrucao", SEQ(OR(I_(instr_DUP, "DUP"),
+        { "Instrucao", SEQ(OR(I_(instr_NOP, "NOP"),
+                              I_(instr_DUP, "DUP"),
                               I_(instr_ROT, "ROT"),
                               I_(instr_ADD, "ADD"),
                               I_(instr_SUB, "SUB"),
@@ -198,13 +209,14 @@ pt_grammar *pia_create_parser() {
                               I_(instr_DIV, "DIV"),
                               I_(instr_MOD, "MOD"),
                               SEQ_(instr_PUSH, I("PUSH"), V("EspacoArg"), V("Constante")),
+                              I_(instr_POP, "POP"),
                               SEQ_(instr_CALL, I("CALL"), V("EspacoArg"), V("NomeFuncao")),
                               SEQ_(instr_PRINT, I("PRINT"), Q(SEQ(V("EspacoArg"), V("String")), -1))),
                            V("EOI")) },
         { "DefFuncao", SEQ(I_(func_line, "FUNCTION"), V("EspacoArg"), V("NomeFuncao"), V("EOI"), V("S"),
                                           Q(SEQ(V("Instrucao"), V("S")), 0),
                            OR(I("END"), E(ERR_END_EXPECTED, NULL))) },
-        { "NomeFuncao", SEQ_(func_name, OR(L("_"), C(isalpha)), Q(OR(L("_"), C(isalnum)), 0)) },
+        { "NomeFuncao", SEQ_(func_name, OR(S("-_"), C(isalpha)), Q(OR(S("-_"), C(isalnum)), 0)) },
 
         { "Constante", Q_(todouble, C(isdigit), 1) },  // TODO: float
         { "String", SEQ_(tostring, L("\""), Q(SEQ(NOT(L("\"")), V("Char")), 0), L("\"")) },
@@ -249,7 +261,7 @@ static void on_error(const char *str, size_t where, int code, void *data) {
 	printf("!!%d", state->line_count);
 	find_current_line(state, where);
 	printf(" -> %d\n", state->line_count);
-	fprintf(stderr, "Erro de parse @ %s:%d:%d: %s\n",
+	fprintf(stderr, "Erro de parse @ %s:%d:%ld: %s\n",
 			state->filename,
 			state->line_count,
 			where - state->last_eol_pos + 1,
@@ -283,11 +295,23 @@ pia_parsed_function **pia_parse_file(pia_parser *parser, const char *filename) {
 	return res.data.p;
 }
 
+void pia_free_parsed_function_instrs(pia_parsed_function *f) {
+	int i;
+	for(i = 0; i < f->instr_count; i++) {
+		pia_instr *instr = f->instructions[i];
+		if(instr->opcode == PRINT || instr->opcode == CALL) {
+			free(instr->r1.s);
+		}
+		free(instr);
+	}
+	free(f->instructions);
+}
+
 void pia_free_parsed_functions(pia_parsed_function **parsed_functions) {
 	pia_parsed_function **it;
 	for(it = parsed_functions; *it; it++) {
 		free((*it)->name);
-		free((*it)->instructions);
+		pia_free_parsed_function_instrs(*it);
 		free((*it));
 	}
 	free(parsed_functions);

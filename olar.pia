@@ -1,11 +1,20 @@
+FUNCTION subtrai-e-printa
+	ROT
+	PRINT
+	PRINT " - "
+	ROT
+	PRINT
+	PRINT " = "
+	SUB
+	PRINT
+	PRINT "\n"
+	POP
+END
 
-function coler
-	push 5
-	dup
-	mul
-end
+PUSH 2
+PUSH 5
+PUSH 7
+CALL subtrai-e-printa
 
-PRINT "olar: "
-call coler
-print
-print "\n"
+PUSH 5
+CALL subtrai-e-printa

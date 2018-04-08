@@ -1,37 +1,36 @@
 #ifndef __PIA_JIT_H__
 #define __PIA_JIT_H__
 
-#include <libgccjit.h>
+#include <jit/jit.h>
 #include <Judy.h>
 
 #include "parser.h"
 
 typedef struct pia_jit {
 	pia_parser *parser;         // The parser
-	gcc_jit_context *ctx;       // JIT context
+	jit_context_t ctx;          // JIT context
 
 	const char *filename;       // The current filename
 
-	gcc_jit_type *int_type;     // 'int' type
-	gcc_jit_type *intp_type;    // 'int *' type
-	gcc_jit_type *double_type;  // 'double' type
-	gcc_jit_type *doublep_type; // 'double *' type
-	gcc_jit_type *void_type;    // 'void' return type
-	gcc_jit_rvalue *int_one;    // '1'
+	jit_type_t _intp;
+	jit_type_t _doublep;
+	jit_type_t _charp;
+	jit_type_t func_signature;  // Compiled functions signature: void(double *, int *)
+	jit_type_t printf_s_signature;
+	jit_type_t printf_d_signature;
 
-	gcc_jit_lvalue *v;          // 'double *v' stack parameter
-	gcc_jit_lvalue *s;          // 'int *s' stack parameter, `v`'s current size
+	jit_value_t v;
+	jit_value_t s;
 
-	gcc_jit_function *printf;   // The 'printf' function
 	Pvoid_t func_map;           // 'Name -> Function' map
 } pia_jit;
 
 int pia_initialize_jit(pia_jit *jit);
 void pia_destroy_jit(pia_jit *jit);
 int pia_run_file(pia_jit *jit, const char *filename);
+jit_function_t pia_find_function(pia_jit *jit, const char *name);
 
 #define PIA_MAIN_FUNCTION "_main"
-typedef void(*pia_function_type)(double *, int *);
 #define STACK_MAX 128
 
 #endif

@@ -1,12 +1,13 @@
 #ifndef __PIA_INSTR_H__
 #define __PIA_INSTR_H__
 
-#include <libgccjit.h>
+#include <jit/jit.h>
 
 #include <stdint.h>
 
-enum {
-	DUP = 0,
+typedef enum {
+	NOP = 0,
+	DUP,
 	ROT,
 	ADD,
 	SUB,
@@ -14,13 +15,15 @@ enum {
 	DIV,
 	MOD,
 	PUSH,
+	POP,
 	CALL,
 	PRINT,
 
 	INSTRUCOES_END,
-};
+} pia_opcode;
 
 static const char * const pia_instruction_names[] = {
+	"NOP",
 	"DUP",
 	"ROT",
 	"ADD",
@@ -29,6 +32,7 @@ static const char * const pia_instruction_names[] = {
 	"DIV",
 	"MOD",
 	"PUSH",
+	"POP",
 	"CALL",
 	"PRINT",
 };
@@ -45,7 +49,7 @@ typedef struct {
 // forward declaration
 typedef struct pia_jit pia_jit;
 
-int pia_instr_populate(pia_jit *jit, gcc_jit_function *func, gcc_jit_block *block, pia_instr *instr);
+int pia_instr_populate(pia_jit *jit, jit_function_t func, pia_instr *instr);
 
 #endif
 
